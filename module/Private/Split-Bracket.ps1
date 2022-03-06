@@ -1,4 +1,4 @@
-function Remove-Bracket {
+function Split-Bracket {
   <#
   .SYNOPSIS
     Remove the bracket of a CUClass like '[String]'

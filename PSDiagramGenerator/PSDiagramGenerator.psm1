@@ -1,5 +1,5 @@
-# Generated at 03/06/2022 19:07:09
-function Remove-Bracket {
+# Generated at 03/06/2022 19:16:27
+function Split-Bracket {
   <#
   .SYNOPSIS
     Remove the bracket of a CUClass like '[String]'
@@ -69,7 +69,7 @@ function New-MermaidClassDiagram {
         if ($Null -ne $Parameter) {
           $Parameter | ForEach-Object {
             if ('' -eq $_.Type) { return }
-            $Type = Remove-Bracket -Str $_.Type
+            $Type = Split-Bracket -Str $_.Type
 
             if ($Type -in $CUClass.Name) {
               $Str = $ConstructorName + $space + $aggregation + $space + $Type
@@ -115,7 +115,7 @@ function New-MermaidClassDiagram {
           $Parameter | ForEach-Object {
             if ('' -eq $_.Type) { return }
             $ParameterName = $_.Name
-            $Type = Remove-Bracket -Str $_.Type
+            $Type = Split-Bracket -Str $_.Type
 
             $Str = $Str + $Type + $space + $ParameterName
 
@@ -135,7 +135,7 @@ function New-MermaidClassDiagram {
     if ($Null -ne $_.Method) {
       $_.Method | ForEach-Object {
         $MethodName = $_.Name
-        $ReturnType = Remove-Bracket -Str $_.ReturnType
+        $ReturnType = Split-Bracket -Str $_.ReturnType
         $Parameter = $_.Parameter
 
         $Str = $tabSpace + $plus + $MethodName + $sp
@@ -143,7 +143,7 @@ function New-MermaidClassDiagram {
         if ($Null -ne $Parameter) {
           $Parameter | ForEach-Object {
             $ParameterName = $_.Name
-            $Type = Remove-Bracket -Str $_.Type
+            $Type = Split-Bracket -Str $_.Type
 
             $Str = $Str + $Type + $space + $ParameterName
 
@@ -170,5 +170,5 @@ function New-MermaidClassDiagram {
   #   $_
   # }
   Set-Clipboard -Value $ClassStrArr
-  Write-Information 'Source code of the class diagram for mermaid is copied to clipboard.'
+  Write-Output 'Source code of the class diagram for mermaid is copied to clipboard.'
 }
