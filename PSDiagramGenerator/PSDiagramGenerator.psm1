@@ -1,4 +1,4 @@
-# Generated at 03/06/2022 19:16:27
+# Generated at 03/06/2022 23:32:57
 function Split-Bracket {
   <#
   .SYNOPSIS
@@ -135,7 +135,6 @@ function New-MermaidClassDiagram {
     if ($Null -ne $_.Method) {
       $_.Method | ForEach-Object {
         $MethodName = $_.Name
-        $ReturnType = Split-Bracket -Str $_.ReturnType
         $Parameter = $_.Parameter
 
         $Str = $tabSpace + $plus + $MethodName + $sp
@@ -143,6 +142,7 @@ function New-MermaidClassDiagram {
         if ($Null -ne $Parameter) {
           $Parameter | ForEach-Object {
             $ParameterName = $_.Name
+            if ('' -eq $_.Type) { return }
             $Type = Split-Bracket -Str $_.Type
 
             $Str = $Str + $Type + $space + $ParameterName
@@ -154,6 +154,8 @@ function New-MermaidClassDiagram {
           }
         }
 
+        if ('' -eq $_.ReturnType) { return }
+        $ReturnType = Split-Bracket -Str $_.ReturnType
         $Str = $Str + $ep + $space + $ReturnType
         $ClassStrArr += $Str
       }
