@@ -35,11 +35,16 @@ $FunctionsToExport = $PublicFunctions.BaseName
 $Manifest = Join-Path -Path $ArtifactDirPath -ChildPath "$($ModuleName).psd1"
 Update-ModuleManifest `
 -Path $Manifest `
+-RootModule "$($ModuleName).psm1" `
 -Author 'Yuichiro Kondo' `
 -Copyright '(c) Yuichiro Kondo. All rights reserved.' `
 -Description 'Provides commands that generate diagrams for mermaid and PlantUML.' `
 -PowerShellVersion '5.0' `
 -FunctionsToExport $FunctionsToExport `
--RequiredModules @("PSClassUtils")
+-RequiredModules @("PSClassUtils") `
+-PrivateData @{
+  Tags = 'diagram','uml','mermaid','class';
+  ProjectUri = 'https://github.com/Connie18/PSDiagramGenerator';
+}
 
 Write-Host "[BUILD][END] End of Build Process" -ForegroundColor Green
