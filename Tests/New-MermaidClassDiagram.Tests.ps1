@@ -14,7 +14,7 @@ Describe 'Normal case' {
       $PSMPath = $PSScriptRoot | Join-Path -ChildPath fixture | Join-Path -ChildPath "$fileName.psm1"
       $actual = New-MermaidClassDiagram -Path $PSMPath
     
-      $TxtPath = $PSScriptRoot | Join-Path -ChildPath fixture | Join-Path -ChildPath "$fileName.txt"
+      $TxtPath = $PSScriptRoot | Join-Path -ChildPath fixture | Join-Path -ChildPath "$fileName.md"
       $expected = Get-Content $TxtPath -Encoding UTF8
     
       $actual | Should -Be $expected
@@ -25,5 +25,8 @@ Describe 'Normal case' {
   }
   It 'should not generate class if the class has no member' {
     RunAndAssert -fileName 'NoMember'
+  }
+  It 'should generate array type class property correctly' {
+    RunAndAssert -fileName 'ListProperty'
   }
 }

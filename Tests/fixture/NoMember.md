@@ -1,1 +1,5 @@
-class ClassName {}
+```mermaid
+classDiagram
+
+
+```

@@ -5,8 +5,8 @@ class Animal {
     $this.name = $name
   }
 
-  [Void] move() {
-    Write-Host 'Move!'
+  [Void] move([String] $str) {
+    Write-Host $str
   }
 }
 

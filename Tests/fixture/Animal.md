@@ -11,7 +11,7 @@ class Animal {
   +Name name
 
   +Animal(Name name) Animal
-  +move() Void
+  +move(String str) Void
 }
 
 class Name {
