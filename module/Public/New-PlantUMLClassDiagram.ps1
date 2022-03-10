@@ -1,11 +1,11 @@
-function New-MermaidClassDiagram {
+function New-PlantUMLClassDiagram {
   <#
   .SYNOPSIS
-    Generate class diagram for mermaid.
+    Generate class diagram for PlantUML.
   .PARAMETER Path
     The path of a file containing PowerShell Classes.
   .OUTPUTS
-    None. Source code of the class diagram for mermaid is copied to clipboard.
+    None. Source code of the class diagram for PlantUML is copied to clipboard.
   #>
   [CmdletBinding()]
   param(
@@ -21,9 +21,8 @@ function New-MermaidClassDiagram {
   $sp = '('
   $ep = ')'
   $comma = ','
-  $mdCode = '```'
-  $startStr = ($mdCode + 'mermaid')
-  $endStr = $mdCode
+  $startStr = '@startuml'
+  $endStr = '@enduml'
   $plus = '+'
   $minus = '-'
   $inheritance = '<|--'
@@ -31,7 +30,6 @@ function New-MermaidClassDiagram {
 
   $ClassStrArr = @()
   $ClassStrArr += $startStr
-  $ClassStrArr += 'classDiagram'
   $ClassStrArr += ''
 
   # Generate Class relation
