@@ -11,5 +11,5 @@ function Split-Bracket {
   )
   # TODO: Make it deal with an objet array like "Object[]"
   # return $Str.Substring(1, $Str.Length - 3)
-  return ([RegEx]::Matches($Str, "(?<=\[).*?(?=\])")).Value
+  return ([RegEx]::Matches($Str, "(?<=^\[).*?(?=\]$)")).Value
 }
