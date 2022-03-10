@@ -27,9 +27,13 @@ jobs:
         shell: powershell
         run: |
           Install-Module -Name Pester -RequiredVersion $env:PESTER_VERSION -Force -SkipPublisherCheck
+          Install-Module -Name PSClassUtils -Force -SkipPublisherCheck
       - name: Invoke Pester
         shell: powershell
         run: Invoke-Pester Tests -EnableExit
       - name: Upload Log
         uses: actions/upload-artifact@v2
         if: failure()
+        with:
+          name: pester-log
+          path: pester.log
