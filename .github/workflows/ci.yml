@@ -1,0 +1,39 @@
+name: CI
+on: [push]
+
+env: 
+  PESTER_VERSION: 4.10.1
+
+jobs:
+  analyze:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Module
+        shell: powershell
+        run: |
+          Uninstall-Module -Name PSScriptAnalyzer -AllVersions
+          Install-Module -Name PSScriptAnalyzer -Force
+      - name: Invoke PSScriptAnalyzer
+        shell: powershell
+        run: |
+          Import-Module -Name PSScriptAnalyzer
+          Invoke-ScriptAnalyzer -Path PSDiagramGenerator/PSDiagramGenerator.psm1
+  test:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Module
+        shell: powershell
+        run: |
+          Install-Module -Name Pester -RequiredVersion $env:PESTER_VERSION -Force -SkipPublisherCheck
+          Install-Module -Name PSClassUtils -Force -SkipPublisherCheck
+      - name: Invoke Pester
+        shell: powershell
+        run: Invoke-Pester Tests -EnableExit
+      - name: Upload Log
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: pester-log
+          path: pester.log
