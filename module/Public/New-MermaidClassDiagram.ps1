@@ -69,6 +69,10 @@ function New-MermaidClassDiagram {
 
   # Generate Class
   $CUClass | ForEach-Object {
+    # Skip if the class has no member
+    if (($Null -eq $_.Property) -and ($Null -eq $_.Constructor) -and ($Null -eq $_.Method)) {
+      return
+    }
 
     $ClassName = $_.Name
     $ClassStrArr += 'class' + $space + $ClassName + $space + $sb
@@ -152,9 +156,8 @@ function New-MermaidClassDiagram {
 
   $ClassStrArr += $mdCode
 
-  # $ClassStrArr | ForEach-Object {
-  #   $_
-  # }
   Set-Clipboard -Value $ClassStrArr
-  Write-Output 'Source code of the class diagram for mermaid is copied to clipboard.'
+  Write-Host 'Source code of the class diagram for mermaid is copied to clipboard.'
+
+  return $ClassStrArr
 }
