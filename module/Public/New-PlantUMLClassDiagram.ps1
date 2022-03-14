@@ -28,6 +28,7 @@ function New-PlantUMLClassDiagram {
     minus       = '-'
     inheritance = '<|--'
     aggregation = 'o--'
+    dependency  = '<..'
   }
 
   $ClassStrArr = @()

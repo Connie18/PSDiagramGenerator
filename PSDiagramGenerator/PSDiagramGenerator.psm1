@@ -1,4 +1,4 @@
-# Generated at 03/15/2022 00:19:46
+# Generated at 03/15/2022 00:45:42
 function New-ClassMember {
   [CmdletBinding()]
   param(
@@ -124,16 +124,34 @@ function New-ClassRelation {
     # Aggregation
     if ($Null -ne $_.Constructor) {
       $_.Constructor | ForEach-Object {
-        $ConstructorName = $_.Name
         $Parameter = $_.Parameter
 
         if ($Null -ne $Parameter) {
           $Parameter | ForEach-Object {
             if ('' -eq $_.Type) { return }
-            $Type = Split-Bracket -Str $_.Type
+            $TypeOfParameter = Split-Bracket -Str $_.Type
 
-            if ($Type -in $CUClass.Name) {
-              $Str = $ConstructorName + $syntax.space + $syntax.aggregation + $syntax.space + $Type
+            if ($TypeOfParameter -in $CUClass.Name) {
+              $Str = $ClassName + $syntax.space + $syntax.aggregation + $syntax.space + $TypeOfParameter
+              $ClassStrArr += $Str
+            }
+          }
+        }
+      }
+    }
+
+    # Dependency
+    if ($Null -ne $_.Method) {
+      $_.Method | ForEach-Object {
+        $Parameter = $_.Parameter
+
+        if ($Null -ne $Parameter) {
+          $Parameter | ForEach-Object {
+            if ('' -eq $_.Type) { return }
+            $TypeOfParameter = Split-Bracket -Str $_.Type
+
+            if ($TypeOfParameter -in $CUClass.Name) {
+              $Str = $ClassName + $syntax.space + $syntax.dependency + $syntax.space + $TypeOfParameter
               $ClassStrArr += $Str
             }
           }
@@ -192,6 +210,7 @@ function New-MermaidClassDiagram {
     minus       = '-'
     inheritance = '<|--'
     aggregation = 'o--'
+    dependency  = '<..'
   }
 
   $ClassStrArr = @()
@@ -244,6 +263,7 @@ function New-PlantUMLClassDiagram {
     minus       = '-'
     inheritance = '<|--'
     aggregation = 'o--'
+    dependency  = '<..'
   }
 
   $ClassStrArr = @()

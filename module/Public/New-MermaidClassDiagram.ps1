@@ -28,6 +28,7 @@ function New-MermaidClassDiagram {
     minus       = '-'
     inheritance = '<|--'
     aggregation = 'o--'
+    dependency  = '<..'
   }
 
   $ClassStrArr = @()
