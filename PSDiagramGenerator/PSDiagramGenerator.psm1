@@ -1,4 +1,148 @@
-# Generated at 03/10/2022 23:44:12
+# Generated at 03/15/2022 00:19:46
+function New-ClassMember {
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $true)]
+    $CUClass,
+
+    [Parameter(Mandatory = $true)]
+    $ClassStrArr,
+
+    [Parameter(Mandatory = $true)]
+    $Syntax
+  )
+  $CUClass | ForEach-Object {
+    # Skip if the class has no member
+    if (($Null -eq $_.Property) -and ($Null -eq $_.Constructor) -and ($Null -eq $_.Method)) {
+      return
+    }
+
+    $ClassName = $_.Name
+    $ClassStrArr += 'class' + $syntax.space + $ClassName + $syntax.space + $syntax.sb
+
+    # Property
+    if ($Null -ne $_.Property) {
+      $_.Property | ForEach-Object {
+        $PropertyName = $_.Name
+        $Type = $_.Type
+        $Visibility = if ("Hidden" -eq $_.Visibility) { $syntax.minus } else { $syntax.plus }
+
+        $Str = $syntax.tabSpace + $Visibility + $Type + $syntax.space + $PropertyName
+        $ClassStrArr += $Str
+      }
+    }
+
+    $ClassStrArr += ''
+
+    # Constructor
+    if ($Null -ne $_.Constructor) {
+      $_.Constructor | ForEach-Object {
+        $ConstructorName = $_.Name
+        $Parameter = $_.Parameter
+
+        $Str = $syntax.tabSpace + $syntax.plus + $ConstructorName + $syntax.sp
+
+        if ($Null -ne $Parameter) {
+          $Parameter | ForEach-Object {
+            if ('' -eq $_.Type) { return }
+            $ParameterName = $_.Name
+            $Type = Split-Bracket -Str $_.Type
+
+            $Str = $Str + $Type + $syntax.space + $ParameterName
+
+            # In case there are multiple parameters
+            if ($Parameter.IndexOf($_) -lt $Parameter.Count - 1) {
+              $Str = $Str + $syntax.comma + $syntax.space
+            }
+          }
+        }
+
+        $Str = $Str + $syntax.ep + $syntax.space + $ConstructorName
+        $ClassStrArr += $Str
+      }
+    }
+
+    # Method
+    if ($Null -ne $_.Method) {
+      $_.Method | ForEach-Object {
+        $MethodName = $_.Name
+        $Parameter = $_.Parameter
+
+        $Str = $syntax.tabSpace + $syntax.plus + $MethodName + $syntax.sp
+
+        if ($Null -ne $Parameter) {
+          $Parameter | ForEach-Object {
+            $ParameterName = $_.Name
+            if ('' -eq $_.Type) { return }
+            $Type = Split-Bracket -Str $_.Type
+
+            $Str = $Str + $Type + $syntax.space + $ParameterName
+
+            # In case there are multiple parameters
+            if ($Parameter.IndexOf($_) -lt $Parameter.Count - 1) {
+              $Str = $Str + $syntax.comma + $syntax.space
+            }
+          }
+        }
+
+        if ('' -eq $_.ReturnType) { return }
+        $ReturnType = Split-Bracket -Str $_.ReturnType
+        $Str = $Str + $syntax.ep + $syntax.space + $ReturnType
+        $ClassStrArr += $Str
+      }
+    }
+
+    # End
+    $ClassStrArr += $syntax.eb
+    $ClassStrArr += ''
+  }
+  return $ClassStrArr
+}
+function New-ClassRelation {
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $true)]
+    $CUClass,
+
+    [Parameter(Mandatory = $true)]
+    $ClassStrArr,
+
+    [Parameter(Mandatory = $true)]
+    $Syntax
+  )
+  $CUClass | ForEach-Object {
+    $ClassName = $_.Name
+
+    # Inheritance
+    if ($Null -ne $_.ParentClassName) {
+      $ParentClassName = $_.ParentClassName
+
+      $Str = $ParentClassName + $syntax.space + $syntax.inheritance + $syntax.space + $ClassName
+      $ClassStrArr += $Str
+    }
+
+    # Aggregation
+    if ($Null -ne $_.Constructor) {
+      $_.Constructor | ForEach-Object {
+        $ConstructorName = $_.Name
+        $Parameter = $_.Parameter
+
+        if ($Null -ne $Parameter) {
+          $Parameter | ForEach-Object {
+            if ('' -eq $_.Type) { return }
+            $Type = Split-Bracket -Str $_.Type
+
+            if ($Type -in $CUClass.Name) {
+              $Str = $ConstructorName + $syntax.space + $syntax.aggregation + $syntax.space + $Type
+              $ClassStrArr += $Str
+            }
+          }
+        }
+      }
+    }
+  }
+  return $ClassStrArr
+}
 function Split-Bracket {
   <#
   .SYNOPSIS
@@ -34,149 +178,36 @@ function New-MermaidClassDiagram {
   )
   $CUClass = Get-CUClass -Path $Path
 
-  $space = ' '
-  $tabSpace = '  '
-  $sb = '{'
-  $eb = '}'
-  $sp = '('
-  $ep = ')'
-  $comma = ','
-  $mdCode = '```'
-  $startStr = ($mdCode + 'mermaid')
-  $endStr = $mdCode
-  $plus = '+'
-  $minus = '-'
-  $inheritance = '<|--'
-  $aggregation = 'o--'
+  $syntax = @{
+    space       = ' '
+    tabSpace    = '  '
+    sb          = '{'
+    eb          = '}'
+    sp          = '('
+    ep          = ')'
+    comma       = ','
+    startStr    = '```mermaid'
+    endStr      = '```'
+    plus        = '+'
+    minus       = '-'
+    inheritance = '<|--'
+    aggregation = 'o--'
+  }
 
   $ClassStrArr = @()
-  $ClassStrArr += $startStr
+  $ClassStrArr += $syntax.startStr
   $ClassStrArr += 'classDiagram'
   $ClassStrArr += ''
 
   # Generate Class relation
-  $CUClass | ForEach-Object {
-    $ClassName = $_.Name
-
-    # Inheritance
-    if ($Null -ne $_.ParentClassName) {
-      $ParentClassName = $_.ParentClassName
-
-      $Str = $ParentClassName + $space + $inheritance + $space + $ClassName
-      $ClassStrArr += $Str
-    }
-
-    # Aggregation
-    if ($Null -ne $_.Constructor) {
-      $_.Constructor | ForEach-Object {
-        $ConstructorName = $_.Name
-        $Parameter = $_.Parameter
-
-        if ($Null -ne $Parameter) {
-          $Parameter | ForEach-Object {
-            if ('' -eq $_.Type) { return }
-            $Type = Split-Bracket -Str $_.Type
-
-            if ($Type -in $CUClass.Name) {
-              $Str = $ConstructorName + $space + $aggregation + $space + $Type
-              $ClassStrArr += $Str
-            }
-          }
-        }
-      }
-    }
-  }
+  $ClassStrArr = New-ClassRelation -CUClass $CUClass -ClassStrArr $ClassStrArr -Syntax $syntax
 
   $ClassStrArr += ''
 
   # Generate Class
-  $CUClass | ForEach-Object {
-    # Skip if the class has no member
-    if (($Null -eq $_.Property) -and ($Null -eq $_.Constructor) -and ($Null -eq $_.Method)) {
-      return
-    }
+  $ClassStrArr = New-ClassMember -CUClass $CUClass -ClassStrArr $ClassStrArr -Syntax $syntax
 
-    $ClassName = $_.Name
-    $ClassStrArr += 'class' + $space + $ClassName + $space + $sb
-
-    # Property
-    if ($Null -ne $_.Property) {
-      $_.Property | ForEach-Object {
-        $PropertyName = $_.Name
-        $Type = $_.Type
-        $Visibility = if ("Hidden" -eq $_.Visibility) { $minus } else { $plus }
-
-        $Str = $tabSpace + $Visibility + $Type + $space + $PropertyName
-        $ClassStrArr += $Str
-      }
-    }
-
-    $ClassStrArr += ''
-
-    # Constructor
-    if ($Null -ne $_.Constructor) {
-      $_.Constructor | ForEach-Object {
-        $ConstructorName = $_.Name
-        $Parameter = $_.Parameter
-
-        $Str = $tabSpace + $plus + $ConstructorName + $sp
-
-        if ($Null -ne $Parameter) {
-          $Parameter | ForEach-Object {
-            if ('' -eq $_.Type) { return }
-            $ParameterName = $_.Name
-            $Type = Split-Bracket -Str $_.Type
-
-            $Str = $Str + $Type + $space + $ParameterName
-
-            # In case there are multiple parameters
-            if ($Parameter.IndexOf($_) -lt $Parameter.Count - 1) {
-              $Str = $Str + $comma + $space
-            }
-          }
-        }
-
-        $Str = $Str + $ep + $space + $ConstructorName
-        $ClassStrArr += $Str
-      }
-    }
-
-    # Method
-    if ($Null -ne $_.Method) {
-      $_.Method | ForEach-Object {
-        $MethodName = $_.Name
-        $Parameter = $_.Parameter
-
-        $Str = $tabSpace + $plus + $MethodName + $sp
-
-        if ($Null -ne $Parameter) {
-          $Parameter | ForEach-Object {
-            $ParameterName = $_.Name
-            if ('' -eq $_.Type) { return }
-            $Type = Split-Bracket -Str $_.Type
-
-            $Str = $Str + $Type + $space + $ParameterName
-
-            # In case there are multiple parameters
-            if ($Parameter.IndexOf($_) -lt $Parameter.Count - 1) {
-              $Str = $Str + $comma + $space
-            }
-          }
-        }
-
-        if ('' -eq $_.ReturnType) { return }
-        $ReturnType = Split-Bracket -Str $_.ReturnType
-        $Str = $Str + $ep + $space + $ReturnType
-        $ClassStrArr += $Str
-      }
-    }
-
-    # End
-    $ClassStrArr += $eb
-    $ClassStrArr += ''
-  }
-
-  $ClassStrArr += $endStr
+  $ClassStrArr += $syntax.endStr
 
   Set-Clipboard -Value $ClassStrArr
   Write-Host 'Source code of the class diagram for mermaid is copied to clipboard.'
@@ -199,147 +230,36 @@ function New-PlantUMLClassDiagram {
   )
   $CUClass = Get-CUClass -Path $Path
 
-  $space = ' '
-  $tabSpace = '  '
-  $sb = '{'
-  $eb = '}'
-  $sp = '('
-  $ep = ')'
-  $comma = ','
-  $startStr = '@startuml'
-  $endStr = '@enduml'
-  $plus = '+'
-  $minus = '-'
-  $inheritance = '<|--'
-  $aggregation = 'o--'
+  $syntax = @{
+    space       = ' '
+    tabSpace    = '  '
+    sb          = '{'
+    eb          = '}'
+    sp          = '('
+    ep          = ')'
+    comma       = ','
+    startStr    = '@startuml'
+    endStr      = '@enduml'
+    plus        = '+'
+    minus       = '-'
+    inheritance = '<|--'
+    aggregation = 'o--'
+  }
 
   $ClassStrArr = @()
-  $ClassStrArr += $startStr
+  $ClassStrArr += $syntax.startStr
   $ClassStrArr += ''
 
   # Generate Class relation
-  $CUClass | ForEach-Object {
-    $ClassName = $_.Name
-
-    # Inheritance
-    if ($Null -ne $_.ParentClassName) {
-      $ParentClassName = $_.ParentClassName
-
-      $Str = $ParentClassName + $space + $inheritance + $space + $ClassName
-      $ClassStrArr += $Str
-    }
-
-    # Aggregation
-    if ($Null -ne $_.Constructor) {
-      $_.Constructor | ForEach-Object {
-        $ConstructorName = $_.Name
-        $Parameter = $_.Parameter
-
-        if ($Null -ne $Parameter) {
-          $Parameter | ForEach-Object {
-            if ('' -eq $_.Type) { return }
-            $Type = Split-Bracket -Str $_.Type
-
-            if ($Type -in $CUClass.Name) {
-              $Str = $ConstructorName + $space + $aggregation + $space + $Type
-              $ClassStrArr += $Str
-            }
-          }
-        }
-      }
-    }
-  }
+  $ClassStrArr = New-ClassRelation -CUClass $CUClass -ClassStrArr $ClassStrArr -Syntax $syntax
 
   $ClassStrArr += ''
 
   # Generate Class
-  $CUClass | ForEach-Object {
-    # Skip if the class has no member
-    if (($Null -eq $_.Property) -and ($Null -eq $_.Constructor) -and ($Null -eq $_.Method)) {
-      return
-    }
+  $ClassStrArr = New-ClassMember -CUClass $CUClass -ClassStrArr $ClassStrArr -Syntax $syntax
 
-    $ClassName = $_.Name
-    $ClassStrArr += 'class' + $space + $ClassName + $space + $sb
 
-    # Property
-    if ($Null -ne $_.Property) {
-      $_.Property | ForEach-Object {
-        $PropertyName = $_.Name
-        $Type = $_.Type
-        $Visibility = if ("Hidden" -eq $_.Visibility) { $minus } else { $plus }
-
-        $Str = $tabSpace + $Visibility + $Type + $space + $PropertyName
-        $ClassStrArr += $Str
-      }
-    }
-
-    $ClassStrArr += ''
-
-    # Constructor
-    if ($Null -ne $_.Constructor) {
-      $_.Constructor | ForEach-Object {
-        $ConstructorName = $_.Name
-        $Parameter = $_.Parameter
-
-        $Str = $tabSpace + $plus + $ConstructorName + $sp
-
-        if ($Null -ne $Parameter) {
-          $Parameter | ForEach-Object {
-            if ('' -eq $_.Type) { return }
-            $ParameterName = $_.Name
-            $Type = Split-Bracket -Str $_.Type
-
-            $Str = $Str + $Type + $space + $ParameterName
-
-            # In case there are multiple parameters
-            if ($Parameter.IndexOf($_) -lt $Parameter.Count - 1) {
-              $Str = $Str + $comma + $space
-            }
-          }
-        }
-
-        $Str = $Str + $ep + $space + $ConstructorName
-        $ClassStrArr += $Str
-      }
-    }
-
-    # Method
-    if ($Null -ne $_.Method) {
-      $_.Method | ForEach-Object {
-        $MethodName = $_.Name
-        $Parameter = $_.Parameter
-
-        $Str = $tabSpace + $plus + $MethodName + $sp
-
-        if ($Null -ne $Parameter) {
-          $Parameter | ForEach-Object {
-            $ParameterName = $_.Name
-            if ('' -eq $_.Type) { return }
-            $Type = Split-Bracket -Str $_.Type
-
-            $Str = $Str + $Type + $space + $ParameterName
-
-            # In case there are multiple parameters
-            if ($Parameter.IndexOf($_) -lt $Parameter.Count - 1) {
-              $Str = $Str + $comma + $space
-            }
-          }
-        }
-
-        if ('' -eq $_.ReturnType) { return }
-        $ReturnType = Split-Bracket -Str $_.ReturnType
-        $Str = $Str + $ep + $space + $ReturnType
-        $ClassStrArr += $Str
-      }
-    }
-
-    # End
-    $ClassStrArr += $eb
-    $ClassStrArr += ''
-  }
-
-  $ClassStrArr += $endStr
+  $ClassStrArr += $syntax.endStr
 
   Set-Clipboard -Value $ClassStrArr
   Write-Host 'Source code of the class diagram for mermaid is copied to clipboard.'
