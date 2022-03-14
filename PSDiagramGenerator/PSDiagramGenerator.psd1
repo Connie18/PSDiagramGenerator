@@ -12,7 +12,7 @@
 RootModule = 'PSDiagramGenerator.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.0.0'
+ModuleVersion = '1.1.0'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = 'diagram','uml','mermaid','class'
+        Tags = 'diagram','uml','mermaid', 'plantuml','class'
 
         # A URL to the license for this module.
         # LicenseUri = ''
