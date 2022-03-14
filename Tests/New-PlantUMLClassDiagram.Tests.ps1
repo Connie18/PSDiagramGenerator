@@ -29,4 +29,8 @@ Describe 'Normal case' {
   It 'should generate array type class property correctly' {
     RunAndAssert -fileName 'ListProperty'
   }
+  It 'should generate class that has dependency relation' {
+    RunAndAssert -fileName 'Dependency'
+  }
+
 }

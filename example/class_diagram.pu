@@ -1,5 +1,4 @@
-```mermaid
-classDiagram
+@startuml
 
 Animal o-- Name
 Animal <|-- Dog
@@ -32,4 +31,4 @@ class Fish {
   +move() Void
 }
 
-```
+@enduml
