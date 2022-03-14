@@ -110,6 +110,12 @@ class Fish {
 
 ```
 
+If the classes exist in multiple files, use the cmdlet like following. 
+
+```powershell
+New-MermaidClassDiagram -Path (Get-Item -Path ./*.psm1)
+```
+
 ## New-PlantUMLClassDiagram
 
 ### Functionality
@@ -163,6 +169,11 @@ class Fish {
 
 ![image](https://user-images.githubusercontent.com/41112776/157869730-f031afab-9015-4687-ba58-ad5de0940033.png)
 
+If the classes exist in multiple files, use the cmdlet like following. 
+
+```powershell
+New-PlantUMLClassDiagram -Path (Get-Item -Path ./*.psm1)
+```
 
 ## TBD
 
